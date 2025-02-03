@@ -1,44 +1,66 @@
 <?php
 
-namespace Inovector\Mixpost\Models;
+namespace LumeSocial\Models;
 
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class PostVersion extends Model
 {
-    public $table = 'mixpost_post_versions';
+    use HasFactory;
 
-    public $timestamps = false;
-
-    protected $fillable = [
-        'account_id',
-        'is_original',
-        'content'
-    ];
+    protected $guarded = [];
 
     protected $casts = [
-        'is_original' => 'boolean',
         'content' => 'array',
+        'metadata' => 'array',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime'
     ];
 
-    public function scopeHasMedia(Builder $query, Media $media): Builder
+    protected $with = ['media'];
+
+    public function post(): BelongsTo
     {
-        return $query->whereRaw("JSON_SEARCH(content, 'all', ?, NULL, '$[*].media') is not null", [(string)$media->id]);
+        return $this->belongsTo('LumeSocial\Models\Post', 'post_id');
     }
 
-    public function removeMedia(Media $media): void
+    public function organization(): BelongsTo
     {
-        $content = $this->content;
-
-        foreach ($content as $i => $contentData) {
-            $content[$i]['media'] = array_values(array_filter($contentData['media'], function ($val) use ($media) {
-                return $val != (string)$media->id;
-            }));
-        }
-
-        $this->content = $content;
-        $this->save();
+        return $this->belongsTo('LumeSocial\Models\Organization', 'organization_id');
     }
 
+    public function media(): MorphMany
+    {
+        return $this->morphMany('LumeSocial\Models\Media', 'mediable');
+    }
+
+    public function isLatest(): bool
+    {
+        return !self::where('post_id', $this->post_id)
+            ->where('created_at', '>', $this->created_at)
+            ->exists();
+    }
+
+    public function getContentAttribute($value): array
+    {
+        return json_decode($value, true) ?? [];
+    }
+
+    public function setContentAttribute($value): void
+    {
+        $this->attributes['content'] = is_array($value) ? json_encode($value) : $value;
+    }
+
+    public function getMetadataAttribute($value): array
+    {
+        return json_decode($value, true) ?? [];
+    }
+
+    public function setMetadataAttribute($value): void
+    {
+        $this->attributes['metadata'] = is_array($value) ? json_encode($value) : $value;
+    }
 }

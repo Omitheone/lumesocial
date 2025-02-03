@@ -1,6 +1,6 @@
 <?php
 
-namespace Inovector\Mixpost;
+namespace LumeSocial\Mixpost;
 
 use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Support\Facades\Event;
@@ -22,6 +22,9 @@ use Inovector\Mixpost\Listeners\SendAccountUnauthorizedNotification;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
+use LumeSocial\Mixpost\SocialProviderManager;
+use LumeSocial\Mixpost\Settings;
+use LumeSocial\Mixpost\ServiceManager;
 
 class MixpostServiceProvider extends PackageServiceProvider
 {
@@ -78,15 +81,15 @@ class MixpostServiceProvider extends PackageServiceProvider
 
     public function packageRegistered()
     {
-        $this->app->singleton('MixpostSocialProviderManager', function ($app) {
+        $this->app->singleton(SocialProviderManager::class, function ($app) {
             return new SocialProviderManager($app);
         });
 
-        $this->app->singleton('MixpostSettings', function ($app) {
+        $this->app->singleton(Settings::class, function ($app) {
             return new Settings($app);
         });
 
-        $this->app->singleton('MixpostServiceManager', function ($app) {
+        $this->app->singleton(ServiceManager::class, function ($app) {
             return new ServiceManager($app);
         });
     }

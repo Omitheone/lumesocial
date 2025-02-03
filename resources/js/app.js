@@ -7,10 +7,12 @@ import "@css/proseMirror.css";
 import {createApp, h} from 'vue';
 import {createInertiaApp} from '@inertiajs/vue3';
 import {resolvePageComponent} from 'laravel-vite-plugin/inertia-helpers';
-import {ZiggyVue} from '../../vendor/tightenco/ziggy/dist/vue.m';
 import {vTooltip} from 'floating-vue'
 import AuthenticatedLayout from '@/Layouts/Authenticated.vue';
 import {router} from "@inertiajs/vue3";
+import routes from './routes.json';
+import EmojiPicker from '@kyvg/vue3-emoji-picker';
+import '@kyvg/vue3-emoji-picker/dist/style.css';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Mixpost';
 
@@ -29,7 +31,6 @@ createInertiaApp({
         return createApp({render: () => h(App, props)})
             .use(plugin)
             .directive('tooltip', vTooltip)
-            .use(ZiggyVue, Ziggy)
             .mount(el);
     },
     progress: {
@@ -53,3 +54,5 @@ router.on('navigate', (event) => {
 
     stale = false;
 });
+
+console.log(routes.home); // Outputs home route path

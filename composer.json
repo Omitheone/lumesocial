@@ -1,87 +1,57 @@
 {
-    "name": "inovector/mixpost",
-    "description": "Self-hosted social media management software.",
-    "keywords": [
-        "social-media-management",
-        "content-scheduling",
-        "social-platform-integration",
-        "calendar-scheduling",
-        "self-hosted",
-        "open-sourced",
-        "mixpost"
-    ],
-    "homepage": "https://github.com/inovector/mixpost",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Dima Botezatu",
-            "email": "dima@inovector.com",
-            "role": "Developer"
-        }
-    ],
+    "name": "lumesocial/core",
+    "type": "library",
     "require": {
-        "php": "^8.2",
-        "ext-fileinfo": "*",
-        "guzzlehttp/guzzle": "^7.8",
-        "illuminate/contracts": "^10.47|^11.0",
-        "inertiajs/inertia-laravel": "^1.0",
-        "inovector/twitteroauth": "^7.0",
+        "php": "^8.1",
+        "laravel/framework": "^10.0",
+        "openai-php/client": "^0.8.0",
         "intervention/image": "^2.7",
-        "laravel/horizon": "^5.0",
-        "php-ffmpeg/php-ffmpeg": "^1.0",
-        "spatie/laravel-package-tools": "^1.14",
-        "spatie/temporary-directory": "^2.1",
-        "tightenco/ziggy": "1.*"
+        "laravel/sanctum": "*",
+        "symfony/http-client": "^7.2",
+        "stripe/stripe-php": "^16.5",
+        "spatie/laravel-package-tools": "^1.18",
+        "inertiajs/inertia-laravel": "^0.6.3",
+        "nesbot/carbon": "^2.67",
+        "laradumps/laradumps": "^3.5",
+        "laravel/horizon": "^5.30",
+        "laravel/pail": "^1.2",
+        "tightenco/ziggy": "1.4.2",
+        "predis/predis": "^2.3"
     },
     "require-dev": {
-        "laradumps/laradumps": "^3.1",
-        "nunomaduro/collision": "^8.1",
-        "orchestra/testbench": "^9.2",
-        "pestphp/pest": "^2.34",
-        "pestphp/pest-plugin-faker": "^2.0",
-        "pestphp/pest-plugin-laravel": "^2.0",
-        "phpstan/extension-installer": "^1.1",
-        "phpstan/phpstan-deprecation-rules": "^1.0",
-        "phpstan/phpstan-phpunit": "^1.0",
-        "phpunit/phpunit": "^10.5"
+        "phpunit/phpunit": "^10.5",
+        "mockery/mockery": "^1.6",
+        "orchestra/testbench": "^8.0",
+        "fakerphp/faker": "^1.9",
+        "pestphp/pest": "^2.0",
+        "pestphp/pest-plugin-laravel": "^2.2"
     },
     "autoload": {
         "psr-4": {
-            "Inovector\\Mixpost\\": "src",
-            "Inovector\\Mixpost\\Database\\Factories\\": "database/factories"
-        },
-        "files": [
-            "src/helpers.php"
-        ]
+            "LumeSocial\\": "src/",
+            "App\\": "app/",
+            "LumeSocial\\Mixpost\\": "src/"
+        }
     },
     "autoload-dev": {
         "psr-4": {
-            "Inovector\\Mixpost\\Tests\\": "tests"
-        }
-    },
-    "scripts": {
-        "analyse": "vendor/bin/phpstan analyse",
-        "test": "vendor/bin/pest",
-        "test-coverage": "vendor/bin/pest --coverage",
-        "format": "vendor/bin/pint"
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true
+            "Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Inovector\\Mixpost\\MixpostServiceProvider"
-            ],
-            "aliases": {
-                "Mixpost": "Inovector\\Mixpost\\Facades\\Mixpost"
-            }
+                "LumeSocial\\Providers\\LumeSocialServiceProvider"
+            ]
         }
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true,
+            "pestphp/pest-plugin": true
+        },
+        "platform": {
+            "php": "8.2.0"
+        }
+    }
 }

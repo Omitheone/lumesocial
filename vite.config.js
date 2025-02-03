@@ -59,6 +59,10 @@ export default defineConfig(({command, mode}) => {
                 '@img': '/resources/img'
             },
         },
-        server: serverConfig
+        server: {
+            hmr: {
+                host: 'mixpost.test'
+            }
+        }
     }
 });

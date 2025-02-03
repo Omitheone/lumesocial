@@ -1,6 +1,6 @@
 <?php
 
-namespace Inovector\Mixpost\Facades;
+namespace LumeSocial\Mixpost\Facades;
 
 use Illuminate\Support\Facades\Facade;
 use Inovector\Mixpost\Collection\ServiceCollection;
@@ -18,6 +18,8 @@ use Inovector\Mixpost\Collection\ServiceCollection;
  * @method static void put(string $name, array $configuration, bool $active = false)
  * @method static void forget(string $name)
  * @method static void retrievalAction(callable $action)
+ * @method static mixed get(string $key, mixed $default = null)
+ * @method static array getExposedFormAttributes()
  *
  * @see \Inovector\Mixpost\ServiceManager
  */
@@ -25,6 +27,6 @@ class ServiceManager extends Facade
 {
     protected static function getFacadeAccessor()
     {
-        return 'MixpostServiceManager';
+        return \LumeSocial\Mixpost\ServiceManager::class;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Inovector\Mixpost\Models;
+namespace LumeSocial\Models;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Inovector\Mixpost\Concerns\Model\HasUuid;
 use Inovector\Mixpost\Enums\PostScheduleStatus;
 use Inovector\Mixpost\Enums\PostStatus;
@@ -21,10 +22,14 @@ class Post extends Model
 
     public $table = 'mixpost_posts';
 
+    protected $guarded = [];
+
     protected $fillable = [
-        'status',
-        'scheduled_at',
-        'published_at'
+        'content',
+        'ai_review_score',
+        'ai_review_feedback',
+        'organization_id',
+        'user_id',
     ];
 
     protected $casts = [
@@ -32,6 +37,9 @@ class Post extends Model
         'schedule_status' => PostScheduleStatus::class,
         'scheduled_at' => 'datetime',
         'published_at' => 'datetime',
+        'content' => 'array',
+        'metadata' => 'array',
+        'ai_review_score' => 'float',
     ];
 
     protected function scheduledAt(): Attribute
@@ -62,8 +70,8 @@ class Post extends Model
 
     public function tags(): BelongsToMany
     {
-        return $this->belongsToMany(Tag::class, 'mixpost_tag_post', 'post_id', 'tag_id')
-            ->orderByPivot('id');
+        return $this->belongsToMany('LumeSocial\Models\Tag', 'post_tags')
+            ->withTimestamps();
     }
 
     public function scopeFailed(Builder $query): Builder
@@ -167,5 +175,40 @@ class Post extends Model
         $this->accounts()->updateExistingPivot($account->id, [
             'errors' => json_encode($errors)
         ]);
+    }
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo('LumeSocial\Models\Account', 'account_id');
+    }
+
+    public function engagementMetrics(): HasMany
+    {
+        return $this->hasMany('LumeSocial\Models\EngagementMetric', 'post_id');
+    }
+
+    public function imageSuggestions(): HasMany
+    {
+        return $this->hasMany('LumeSocial\Models\AiImageSuggestion', 'post_id');
+    }
+
+    public function analytics(): HasMany
+    {
+        return $this->hasMany('LumeSocial\Models\PostAnalytics', 'post_id');
+    }
+
+    public function schedule(): HasMany
+    {
+        return $this->hasMany('LumeSocial\Models\PostSchedule', 'post_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

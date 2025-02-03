@@ -1,6 +1,6 @@
 <?php
 
-namespace Inovector\Mixpost;
+namespace LumeSocial\Mixpost;
 
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -16,15 +16,23 @@ use Inovector\Mixpost\Services\TenorService;
 use Inovector\Mixpost\Services\TwitterService;
 use Inovector\Mixpost\Services\UnsplashService;
 use Inovector\Mixpost\Support\Log;
+use Illuminate\Contracts\Foundation\Application;
 
 class ServiceManager
 {
     protected ?ServiceCollection $cacheServices = null;
     protected mixed $config;
+    /** @var array<string, mixed> */
+    protected array $exposedFormAttributes = [];
+    protected array $services = [];
 
-    public function __construct(Container $container)
+    public function __construct(Application $app)
     {
-        $this->config = $container->make('config');
+        $this->config = $app->make('config');
+        $this->exposedFormAttributes = [];
+        $this->services = [
+            'social_providers' => config('mixpost.social_providers', [])
+        ];
     }
 
     protected function registeredServices(): array
@@ -108,7 +116,8 @@ class ServiceManager
     public function exposedConfiguration(string|array $name = null): array
     {
         if (is_string($name)) {
-            return Arr::only($this->get($name, 'configuration'), $this->getServiceClass($name)::$exposedFormAttributes);
+            $serviceClass = $this->getServiceClass($name);
+            return Arr::only($this->get($name, 'configuration'), $serviceClass::$exposedAttributes ?? []);
         }
 
         if (is_array($name)) {
@@ -132,55 +141,9 @@ class ServiceManager
         ]);
     }
 
-    public function get(string $name, null|string $key = null)
+    public function get(string $key, mixed $default = null): mixed
     {
-        // Mastodon service is not exists. Each Mastodon server has its own configuration.
-        // Mastodon configuration is stored during connection process.
-        $isMastodon = Str::startsWith($name, 'mastodon.');
-
-        $defaultPayload = [
-            'configuration' => $isMastodon ? [] : $this->getServiceClass($name)::form(),
-            'active' => $isMastodon,
-        ];
-
-        $value = $this->getFromCache($name, function () use ($name, $defaultPayload) {
-            $dbRecord = ServiceModel::where('name', $name)->first();
-
-            try {
-                $payload = $dbRecord ? [
-                    'configuration' => array_merge($defaultPayload['configuration'], $dbRecord->configuration->toArray()),
-                    'active' => $dbRecord->active ?? false,
-
-                ] : $defaultPayload;
-
-                $this->put($name, $payload['configuration'], $payload['active']);
-
-                return $payload;
-            } catch (DecryptException $exception) {
-                $this->logDecryptionError($name, $exception);
-
-                return $defaultPayload;
-            }
-        });
-
-        // Decrypt the configuration from the cache
-        if (!is_array($value['configuration'] ?? [])) {
-            try {
-                $value = array_merge($value, [
-                    'configuration' => json_decode(Crypt::decryptString($value['configuration']), true),
-                ]);
-            } catch (DecryptException $exception) {
-                $this->logDecryptionError($name, $exception);
-
-                $value = $defaultPayload;
-            }
-        }
-
-        if ($key) {
-            return Arr::get($value, $key);
-        }
-
-        return $value;
+        return data_get($this->services, $key, $default);
     }
 
     public function all(): array
@@ -218,5 +181,21 @@ class ServiceManager
         Log::error("The application key cannot decrypt the service configuration: {$exception->getMessage()}", [
             'service_name' => $name
         ]);
+    }
+
+    public function exposedFormAttributes(): array
+    {
+        return $this->exposedFormAttributes;
+    }
+
+    public function setExposedFormAttributes(array $attributes): self
+    {
+        $this->exposedFormAttributes = $attributes;
+        return $this;
+    }
+
+    public function getExposedFormAttributes(): array
+    {
+        return $this->exposedFormAttributes;
     }
 }

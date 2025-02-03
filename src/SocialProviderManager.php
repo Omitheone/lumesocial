@@ -1,16 +1,22 @@
 <?php
 
-namespace Inovector\Mixpost;
+namespace LumeSocial\Mixpost;
 
 use Inovector\Mixpost\Abstracts\SocialProviderManager as SocialProviderManagerAbstract;
-use Inovector\Mixpost\Facades\ServiceManager;
+use LumeSocial\Mixpost\Facades\ServiceManager;
 use Inovector\Mixpost\SocialProviders\Meta\FacebookPageProvider;
 use Inovector\Mixpost\SocialProviders\Twitter\TwitterProvider;
 use Inovector\Mixpost\SocialProviders\Mastodon\MastodonProvider;
+use Illuminate\Contracts\Foundation\Application;
 
 class SocialProviderManager extends SocialProviderManagerAbstract
 {
     protected array $providers = [];
+
+    public function __construct(Application $app)
+    {
+        // Implementation
+    }
 
     public function providers(): array
     {

@@ -1,20 +1,21 @@
 <?php
 
-namespace Inovector\Mixpost;
+namespace LumeSocial\Mixpost;
 
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Inovector\Mixpost\Models\Setting;
+use Illuminate\Contracts\Foundation\Application;
 
 class Settings
 {
     protected mixed $config;
 
-    public function __construct(Container $container)
+    public function __construct(Application $app)
     {
-        $this->config = $container->make('config');
+        $this->config = $app->make('config');
     }
 
     public function form(): array
